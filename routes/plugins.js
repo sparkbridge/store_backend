@@ -2,6 +2,7 @@ const express = require('express');
 const { readData, writeData } = require('../utils/fileDb');
 const router = express.Router();
 const { getActiveProxy } = require('../utils/proxyManager');
+const { addLog } = require('../utils/logger');
 // ================= 1. 获取所有公开插件列表 =================
 // GET /api/v1/plugins ：获取所有公开插件列表 (精简版)
 router.get('/', async (req, res) => {
@@ -46,6 +47,8 @@ router.get('/:name', async (req, res) => {
         // 如果原数据里没有 views 字段，(plugins[pluginIndex].views || 0) 会将其初始化为 0
         plugins[pluginIndex].views = (plugins[pluginIndex].views || 0) + 1;
 
+        await addLog('PLUGIN_VIEW', `用户查看了插件: ${name}`);
+
         // 异步将更新后的数据写回 JSON 和内存缓存
         // 注意：这里故意不加 await！让硬盘慢慢去写，我们立刻把数据返回给前端，保证接口极速响应
         writeData('plugins.json', plugins).catch(err => console.error('[Error] 更新浏览量失败:', err));
@@ -64,9 +67,13 @@ router.get('/:name/download', async (req, res) => {
         const plugins = await readData('plugins.json');
         const pluginIndex = plugins.findIndex(p => p.name === name);
 
+
         if (pluginIndex === -1) {
             return res.status(404).json({ code: 404, msg: "未找到该插件" });
         }
+
+
+        await addLog('PLUGIN_DOWNLOAD', `用户下载了插件: ${name}`);
 
         const plugin = plugins[pluginIndex];
         if (!plugin.downloadUrl) {

@@ -1,6 +1,7 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
 const { readData, writeData } = require('../utils/fileDb');
+const { addLog } = require('../utils/logger');
 const router = express.Router();
 
 router.post('/', async (req, res) => {
@@ -12,6 +13,7 @@ router.post('/', async (req, res) => {
         const matchedUser = users.find(u => u.username === name && u.password === message);
 
         if (matchedUser) {
+            await addLog('ADMIN_LOGIN', `管理员 [${matchedUser.username}] 录成功`);
             const token = jwt.sign(
                 { username: matchedUser.username, role: matchedUser.role },
                 process.env.JWT_SECRET,

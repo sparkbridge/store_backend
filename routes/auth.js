@@ -1,6 +1,7 @@
 const express = require('express');
 const authenticateToken = require('../middlewares/auth');
 const { readData, writeData } = require('../utils/fileDb'); // 新增：引入文件读写工具
+const { addLog } = require('../utils/logger');
 const router = express.Router();
 
 // ================= 1. 验证 Token 是否有效 =================
