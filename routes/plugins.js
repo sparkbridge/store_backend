@@ -13,6 +13,8 @@ router.get('/', async (req, res) => {
         });
         const sortedPlugins = bdsPlugins.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
+        await addLog('PLUGIN_VIEW', `用户(${req.ip})查看了所有 BDS 插件`);
+
         // 数据裁剪
         const listData = sortedPlugins.map(p => ({
             name: p.name,
@@ -47,7 +49,7 @@ router.get('/:name', async (req, res) => {
         // 如果原数据里没有 views 字段，(plugins[pluginIndex].views || 0) 会将其初始化为 0
         plugins[pluginIndex].views = (plugins[pluginIndex].views || 0) + 1;
 
-        await addLog('PLUGIN_VIEW', `用户查看了插件: ${name}`);
+        await addLog('PLUGIN_VIEW', `用户(${req.ip})查看了插件: ${name}`);
 
         // 异步将更新后的数据写回 JSON 和内存缓存
         // 注意：这里故意不加 await！让硬盘慢慢去写，我们立刻把数据返回给前端，保证接口极速响应
@@ -73,7 +75,7 @@ router.get('/:name/download', async (req, res) => {
         }
 
 
-        await addLog('PLUGIN_DOWNLOAD', `用户下载了插件: ${name}`);
+        await addLog('PLUGIN_DOWNLOAD', `用户(${req.ip})下载了插件: ${name}`);
 
         const plugin = plugins[pluginIndex];
         if (!plugin.downloadUrl) {

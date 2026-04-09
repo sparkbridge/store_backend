@@ -1,6 +1,8 @@
 const express = require('express');
 const { readData } = require('../utils/fileDb');
+const { addLog } = require('../utils/logger');
 const router = express.Router();
+
 
 // 实际请求路径: GET /api/v1/hub_plugins
 router.get('/', async (req, res) => {
@@ -11,6 +13,8 @@ router.get('/', async (req, res) => {
         const hubPlugins = plugins.filter(p => {
             return p.loadModes && p.loadModes.includes('hub');
         });
+
+        await addLog('PLUGIN_VIEW', `用户(${req.ip})查看了所有 HUB 插件`);
 
         // 按发布时间倒序排列
         const sortedPlugins = hubPlugins.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
